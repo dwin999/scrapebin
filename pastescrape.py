@@ -22,7 +22,7 @@ def addtodb(link,data,title):
 	con.cursor().execute("INSERT INTO PasteBin VALUES (?,?,?,?)", (buffer(link),buffer(title),buffer(data),buffer(timestamp)))
 	con.commit()
 ######Scraping function####################
-def scrape_links(url,title):
+def scrape_links(url,title): # need to add further validatoin here 
 	br = mechanize.Browser()
 	br.set_proxies({"http": "127.0.0.1:3128"})
 	br.addheaders = [('User-agent', 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')]
@@ -32,8 +32,16 @@ def scrape_links(url,title):
 		br.open(url,timeout=30.0)
 		data = br.response().read()
 		addtodb(url,data,title)
+		return True
 	except:
-	      print "Failed to download " + url
+		print "Failed to download " + url # could check if unknown paste id or just no data
+		return False
+	      
+
+def get_archive():
+    #only return once it has the links 
+	
+	return link_list 		
 
 #####Main Program###############
 today = datetime.now().strftime("%Y-%m-%d") + ".db"
@@ -42,28 +50,34 @@ counter = 0
 #debug = 0
 while True:
 	create_db(today)
-	br = mechanize.Browser()
-	br.set_proxies({"http": "127.0.0.1:3128"})#tor support
-	br.addheaders = [('User-agent', 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')]
-	br.open('http://pastebin.com/archive', timeout=30.0)
-	s = time.time()
+	flag = True
+	while(flag == True):
+	    try: 
+			br = mechanize.Browser() 
+			br.set_proxies({"http": "127.0.0.1:3128"})#tor support
+			br.addheaders = [('User-agent', 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')]
+			br.open('http://pastebin.com/archive', timeout=30.0)
+			br.links() 
+			print "Got link " + str(counter)
+			flag = False
+	    except:
+			pass
 	for link in br.links():
-		
-		
 		if((len(link.url) == 9) and ((link.url == "/settings") != 1)):
 			raw_url ="http://pastebin.com/raw.php?i="+str(link.url[1:9])
 			# if the dictaoinry has not got the key in the index it won't scrape it 
 			if not (url_dict.has_key(raw_url)):
-				scrape_links(raw_url,(str(link.text)))
-				url_dict[raw_url] = ' Link Checked'
-				time.sleep(1)
-				print raw_url + " Checked" 
+				# if link is successfully scraped then it's added to the good links list 
+				if(scrape_links(raw_url,(str(link.text)))):
+					url_dict[raw_url] = ' Link Checked'
+					print raw_url + " Checked" 
 				#print "Number of links scraped" + str(debug) + "Time since start" + str(time.time() - s)
 				#debug+=1 
 			#else:
 				#print "Link already checked"
 	if(counter == 5):
 		url_dict.clear() # clear the dictionary every 5 scrapes
+		counter = 0
 	counter+=1
 		
 	
