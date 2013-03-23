@@ -33,6 +33,9 @@ def scrape_links(url,title): # need to add further validatoin here
                 data = br.response().read()
                 addtodb(url,data,title)
                 return True
+        except KeyboardInterrupt:
+                print "Caught keyboard interrupt, quitting."
+                sys.exit(1)
         except:
                 print "Failed to download " + url # could check if unknown paste id or just no data
                 return False
