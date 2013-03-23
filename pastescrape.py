@@ -44,11 +44,11 @@ def get_archive():
         return link_list                
 
 #####Main Program###############
-today = datetime.now().strftime("%Y-%m-%d") + ".db"
 url_dict = {}
 counter = 0
 #debug = 0
 while True:
+        today = datetime.now().strftime("%Y-%m-%d") + ".db"
         create_db(today)
         flag = True
         while(flag == True):
