@@ -7,7 +7,7 @@ import urllib
 from datetime import datetime
 import mechanize
 ########Database Functions########
-def create_db(today): 		
+def create_db(today):		
 	if os.path.isfile(today) <= 0:
 		con = lite.connect(today)
 
@@ -41,7 +41,7 @@ def scrape_links(url,title): # need to add further validatoin here
 def get_archive():
     #only return once it has the links 
 	
-	return link_list 		
+	return link_list		
 
 #####Main Program###############
 today = datetime.now().strftime("%Y-%m-%d") + ".db"
